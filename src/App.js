@@ -1,11 +1,12 @@
 import actiondefinition from './actionDefinition.gif';
+import averages from './averages.gif';
+import delta from './delta.gif';
 import './App.css';
 
 function App() {
   return (
     <div>
       <meta httpEquiv="Content-Type" content="text/html; charset=windows-1250" />
-      <link rel="stylesheet" type="text/css" href="style.css" />  
       <title>Principle of Least Action Interactive</title>
       <h1 align="center">PRINCIPLE OF LEAST ACTION INTERACTIVE</h1>  
       <h2 align="center">Java programming by Slavomir Tuleja<br />
@@ -19,7 +20,7 @@ function App() {
       <p>Throw an apple vertically upward from the ground (zero height). We demand that 3 seconds later the apple return to our hand at the same height (zero) from which we launched it. What is the motion of this apple between the events of launch and catch? At what height can the apple be found at any given time? Or to express the question more technically: What is the <i>worldline</i> of the apple between launch and catch? We use the <b>principle of least action</b> to find answers to these questions.</p>
       <p>The principle of least action defines the action <i>S</i> for motion along a worldline between two fixed events:</p>
       <img src={actiondefinition} width={180} height={43} alt="" border={0} />
-      <p>Here <i>L</i> is called the <b>Lagrangian</b>. In simple cases the Lagrangian is equal to the difference between the kinetic energy <i>T</i> and the potential energy <i>V</i>, that is, <i>L</i>&nbsp;=&nbsp;<i>T</i>&nbsp;–&nbsp;<i>V</i>.  In this interactive document we will approximate a continuous worldline with a worldline made of straight connected segments. The computer then multiplies the value of (<i>T</i>&nbsp;–&nbsp;<i>V</i>) on each segment by the time lapse <img src="gifs/delta.gif" width={9} height={11} alt="" border={0} /><i>t</i> for that segment and adds up the result for all segments, giving us an approximate value for the action <i>S</i> along the entire worldline. Our task is then to move the connected segments of the worldline so that they result in the minimum total value of the action <i>S</i>.</p>
+      <p>Here <i>L</i> is called the <b>Lagrangian</b>. In simple cases the Lagrangian is equal to the difference between the kinetic energy <i>T</i> and the potential energy <i>V</i>, that is, <i>L</i>&nbsp;=&nbsp;<i>T</i>&nbsp;–&nbsp;<i>V</i>.  In this interactive document we will approximate a continuous worldline with a worldline made of straight connected segments. The computer then multiplies the value of (<i>T</i>&nbsp;–&nbsp;<i>V</i>) on each segment by the time lapse <img src={delta} width={9} height={11} alt="" border={0} /><i>t</i> for that segment and adds up the result for all segments, giving us an approximate value for the action <i>S</i> along the entire worldline. Our task is then to move the connected segments of the worldline so that they result in the minimum total value of the action <i>S</i>.</p>
       <p>In the following we assume a mass of 0.2 kilogram for the apple.</p>
       <p>We assume that you are acquainted with the concepts of <i>acceleration</i>, <i>energy</i>, and <i>worldline</i>.</p>
       <br /><br />
@@ -105,7 +106,7 @@ enableZoom=1 -- zoom turned ON
         <table width="100%" border={0} cellSpacing={2} cellPadding={2}>
         <tbody><tr>
             <td width="30%" align="right" valign="top"><b>A.</b></td>
-            <td valign="top"><p><b><i>Checking the computer. Technical.</i> Using the cursor, find coordinates for the endpoints of the first two segments of the worldline. Calculate kinetic energy values for the first two segments of the worldline. Calculate the average potential energy values for the first two segments of the worldline:  <img src="gifs/averages.gif" width={79} height={17} alt="" border={0} align="middle" /> . Compute the average value of the action along each segment of the worldline. Compute the total action along all four segments of the worldline. Compare your numerical total for the action with that displayed by the computer at the lower left.<br /><br /></b></p></td>
+            <td valign="top"><p><b><i>Checking the computer. Technical.</i> Using the cursor, find coordinates for the endpoints of the first two segments of the worldline. Calculate kinetic energy values for the first two segments of the worldline. Calculate the average potential energy values for the first two segments of the worldline:  <img src={averages} width={79} height={17} alt="" border={0} align="middle" /> . Compute the average value of the action along each segment of the worldline. Compute the total action along all four segments of the worldline. Compare your numerical total for the action with that displayed by the computer at the lower left.<br /><br /></b></p></td>
           </tr>
         </tbody></table>
       
