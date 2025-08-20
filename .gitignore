@@ -1,0 +1,8 @@
+# Mac OS
+.DS_Store
+
+# Original Java applet source
+ActionApplets/
+
+# Test files
+test.html

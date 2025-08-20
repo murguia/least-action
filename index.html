@@ -1,0 +1,370 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1250">
+<link rel="stylesheet" type="text/css" href="style.css">  
+<title>Principle of Least Action Interactive</title>
+<script language="JavaScript" src="questionStyles.js"></script>
+<script language="JavaScript" src="leastAction.js"></script>
+</head>
+
+<body>
+<h1 align="center">PRINCIPLE OF LEAST ACTION INTERACTIVE</h1>  
+<h2 align="center">Java programming by Slavomir Tuleja<br>
+Text by Edwin F. Taylor and Slavomir Tuleja<br>
+Draft of March 12, 2003
+</h2>
+
+<h2 align="center">
+  Copied from  https://www.eftaylor.com/software/ActionApplets/LeastAction.html
+</h2>
+
+<h3>Introduction</h3>
+<p>Throw an apple vertically upward from the ground (zero height). We demand that 3 seconds later the apple return to our hand at the same height (zero) from which we launched it. What is the motion of this apple between the events of launch and catch? At what height can the apple be found at any given time? Or to express the question more technically: What is the <i>worldline</i> of the apple between launch and catch? We use the <b>principle of least action</b> to find answers to these questions.</p>
+
+<p>The principle of least action defines the action <i>S</i> for motion along a worldline between two fixed events:</p>
+
+<img src="gifs/actionDefinition.gif" width="180" height="43" alt="" border="0">
+ 
+<p>Here <i>L</i> is called the <b>Lagrangian</b>. In simple cases the Lagrangian is equal to the difference between the kinetic energy <i>T</i> and the potential energy <i>V</i>, that is, <i>L</i>&nbsp;=&nbsp;<i>T</i>&nbsp;–&nbsp;<i>V</i>.  In this interactive document we will approximate a continuous worldline with a worldline made of straight connected segments. The computer then multiplies the value of (<i>T</i>&nbsp;–&nbsp;<i>V</i>) on each segment by the time lapse <img src="gifs/delta.gif" width="9" height="11" alt="" border="0"><i>t</i> for that segment and adds up the result for all segments, giving us an approximate value for the action <i>S</i> along the entire worldline. Our task is then to move the connected segments of the worldline so that they result in the minimum total value of the action <i>S</i>.</p>
+
+<p>In the following we assume a mass of 0.2 kilogram for the apple.</p>
+
+<p>We assume that you are acquainted with the concepts of <i>acceleration</i>, <i>energy</i>, and <i>worldline</i>.</p>
+
+<br><br>
+<h3>Display #1: Manual hunting for the worldline of least
+action</h3>
+
+<p>Find the worldline of the apple that has the minimum value of the action. To do this quickly, use the interactive display to manipulate intermediate points of the worldline. With the cursor, drag each of the three black intermediate points on the worldline up and down. Notice the following features of the display:</p>
+
+<ul>    
+<li><p>You can find the height and time of any location (any <i>event</i>) on the screen by pointing the cursor at that location. The coordinate values appear at the lower right.</p></li>
+
+<li><p>The display shows the current value of the total action <i>S</i> at the bottom left of the display. Below it is displayed the <i>minimum</i> value <i>S</i><sub>min</sub> of the action found so far as you have dragged that dot up and down.</p></li>
+
+<li><p>Your goal is to find the worldline for which the total action is the minimum. For this particular motion, the <i>minimum</i> value of the action is the <i>most negative</i>.</p></li>
+</ul>
+
+<br><br>
+<applet code="JAction.class" codebase="JAction/classes" name="JAction" width="700" height="475">
+<param name="h1" value="0">
+<param name="t1" value="0">
+<param name="h2" value="0">
+<param name="t2" value="3">
+<param name="numOfLayers" value="4">
+<param name="appletMode" value="0">
+<param name="movableEnds" value="0">
+<param name="enableHunting" value="0">
+<param name="enableZoom" value="0">
+</applet>
+
+<!--
+Parameter EXPLANATION:
+appletMode=0 -- no tables at all
+appletMode=1 -- acceleration table
+appletMode=2 -- energy table
+appletMode=3 -- lagrangian and energy table
+appletMode=4 -- table with a, T+V, dS(k), dS(k)+dS(k+1), [dS(k)+dS(k+1)]min
+appletMode=5 -- table with dS(k) and for selected segment pair with dS(k)+dS(k+1), [dS(k)+dS(k+1)]min, a, T+V
+movableEnds=0 -- movable ends turned OFF
+movableEnds=1 -- movable ends turned ON
+enableHunting=0 -- hunting turned OFF
+enableHunting=1 -- hunting turned ON
+enableZoom=0 -- zoom turned OFF
+enableZoom=1 -- zoom turned ON
+-->
+
+<br><br>
+
+<p>Start with the initial worldline that lies straight across the bottom of the spacetime diagram. (RESET if you have been trying out the display.)</p>
+
+<script language="JavaScript">
+question("1.","<i>Lazy apple</i>. What motion of the apple does this initial horizontal worldline describe? Have you ever observed an apple following such a horizontal worldline? Is a horizontal worldline possible for an apple subject to only the downward gravitational force?");
+</script>
+
+
+<p>Put the cursor on one of the three intermediate point-events and drag it upward. What happens to the value of the action shown below the display? Continue dragging that same point upward.</p>
+
+<script language="JavaScript">
+question("2.","<i>Jumpy apple</i>. From the formula for the action, explain why the value of the action begins to rise again as the point is dragged upward beyond a certain height. [Hint: How does potential energy depend on the height of the dot? How does kinetic energy depend on the velocity (the slope of each segment)?]");
+</script>
+
+<p>Drag the dot to the height for which the value of the total action is minimum. Then drag another intermediate point up and down. You can tell immediately when you have passed the height for minimum action, because the <i>S</i><sub>min</sub> display stops changing.</p>
+
+<p>Set the second dot to the minimum-action value and move along to drag the third dot up and down. When you have set the third dot to the height for minimum action, make a prediction about the answer to the following question:</p>
+
+<script language="JavaScript">
+question("3.","<i>Cooperating events. Predict</i>: If you go back and drag the first intermediate dot up and down, can you make the value of the action decrease still further?");
+</script>
+
+<p>Try it by dragging the first dot up and down again. What is the answer to the question? Did you predict correctly?</p>
+
+<script language="JavaScript">
+question("4.","<i>Practice, practice</i>. Was <i>one</i> cycle of adjusting the height of each dot to its minimum-action height sufficient to find the worldline of least action? Explain why or why not.");
+</script>
+
+<p>Now cycle repeatedly through the three dots, moving each one to find the minimum (most negative) value of the action. <i>PLEASE BE PATIENT</i>. It is worth going through this tedious manual process completely at least once.  After many cycles through the three dots, you reach a condition in which added cycles through the dots does <i>not</i> further reduce the value of the total action. <i>Record the value of the minimum action for your final worldline</i>.</p>
+
+<script language="JavaScript">
+question("5.","<i>Balance</i>. Rachel does not believe in the Principle of Least Action. She says, \"Start with the worldline of minimum action. When I drag one dot-event upward, kinetic energy along the two adjacent segments increases. But so does the potential energy along those two segments. So the difference (<i>T&nbsp;–&nbsp;V</i>) should stay the same. Therefore the total action should remain the same. The principle of least action must be wrong!\"  Is Rachel right?  Explain.");
+</script>
+
+<p>The worldline you have constructed satisfies the condition of least action <i>for this special case of a worldline of four straight segments equally spaced along the time axis</i>.</p>
+
+<script language="JavaScript">
+technicalQuestionIntro("","Technical questions, indexed A, B, C, …, typically concern details of the displays rather than basic ideas of the principle of least action.  You may want to skip technical questions the first time through and return to them on a second or third pass.");
+</script>
+
+<script language="JavaScript">
+technicalQuestion("A.","<i>Checking the computer. Technical.</i> Using the cursor, find coordinates for the endpoints of the first two segments of the worldline. Calculate kinetic energy values for the first two segments of the worldline. Calculate the average potential energy values for the first two segments of the worldline:  <img src=\"gifs/averages.gif\" width=\"79\" height=\"17\" alt=\"\" border=\"0\" align=\"middle\"> . Compute the average value of the action along each segment of the worldline. Compute the total action along all four segments of the worldline. Compare your numerical total for the action with that displayed by the computer at the lower left.");
+</script>
+
+<br><br>
+<h3>Display #2: Automatic hunting for worldline of least
+action</h3>
+
+<p>Of course a worldline with only three intermediate points is not realistic. The second display is a bit better, with many intermediate points. If you want, you can start the process of finding the worldline of least action by dragging each of these many event-dots up and down. But life is short, and computers are designed to do routine work quickly.  So let the computer find the worldline of minimum action by repeated cycling through the dot-events at the ends of each segment of the worldline.</p>
+
+<applet code="JAction.class" codebase="JAction/classes" name="JAction" width="700" height="475">
+<param name="h1" value="0">
+<param name="t1" value="0">
+<param name="h2" value="0">
+<param name="t2" value="3">
+<param name="numOfLayers" value="40">
+<param name="appletMode" value="0">
+<param name="movableEnds" value="1">
+<param name="enableHunting" value="1">
+<param name="enableZoom" value="0">
+</applet>
+
+<!--
+Parameter EXPLANATION:
+appletMode=0 -- no tables at all
+appletMode=1 -- acceleration table
+appletMode=2 -- energy table
+appletMode=3 -- lagrangian and energy table
+appletMode=4 -- table with a, T+V, dS(k), dS(k)+dS(k+1), [dS(k)+dS(k+1)]min
+appletMode=5 -- table with dS(k) and for selected segment pair with dS(k)+dS(k+1), [dS(k)+dS(k+1)]min, a, T+V
+movableEnds=0 -- movable ends turned OFF
+movableEnds=1 -- movable ends turned ON
+enableHunting=0 -- hunting turned OFF
+enableHunting=1 -- hunting turned ON
+enableZoom=0 -- zoom turned OFF
+enableZoom=1 -- zoom turned ON
+-->
+
+<br><br>
+<p>Click on the button labeled HUNT. The computer begins cycling quickly through the dots, hunting for the worldline of least action. You can interrupt the process at any time by clicking on PAUSE and then either continue by pressing HUNT again or return to the initial horizontal worldline by clicking on RESET. When the action stops changing as the program hunts, record the value of the action for this worldline and the value of the maximum height of the trajectory.</p>
+
+<script language="JavaScript">
+question("6.","<i>In a valley? Predict:</i> Which of the following statements is correct? Or are both correct? neither? \"After the worldline has stopped changing: (a) If I drag one dot <i>upward</i>, the value of the action <i>S</i> will <i>decrease</i>. (b) If instead I drag the same dot <i>downward</i>, the value of the action <i>S</i> will <i>decrease</i>.\"  Drag one dot up and then down. Was your prediction correct? Explain.");
+</script>
+
+<script language="JavaScript">
+question("7.","<i>More dots better?</i> Compare the value of minimum action for the second display with the value you found for the first display. Are they different? Why or why not?");
+</script>
+
+<p>Of course even a worldline consisting of many straight segments is not the same as a <i>continuous</i> worldline, made up of an infinite number of event-points. The computer is not able to carry out the minimization of action for an infinite number of points. But you can imagine that as more and more dots are added, the value of the resulting action gets closer and closer to the value for a continuous worldline.</p>
+
+<p>This second program differs from the first one in that it allows you to change the heights of initial and final events. Drag the final event to 5 meters height. Notice that the program has rescaled the vertical axis to make it possible for the worldline to fit into the window. Before you press the HUNT button answer the following question:</p>
+
+<script language="JavaScript">
+question("8.","<i>Landing on a step. Predict:</i> With the final event set at 5 meters height, and with the same requirement that the apple arrive at the final event 3 seconds after launch, do you expect the maximum height achieved to be greater or less than the maximum height with the final event at zero height? Make a qualitative argument for your prediction. HUNT and find the maximum height. Was your prediction and qualitative argument correct? If not, what should that argument have been?");
+</script>
+
+<script language="JavaScript">
+technicalQuestion("B.","<i>Action when hop up. Technical. Predict:</i> With the final event set at a height of 5 meters in the display, do you expect the minimum action to be less (that is, <i>more</i> negative) or greater (that is, <i>less</i> negative) than for the final event at zero height? HUNT and check out your prediction. Was it correct? Explain why or why not?");
+</script>
+
+<script language="JavaScript">
+technicalQuestion("C.","<i>Initial change in action. Technical.</i> RESET and drag one intermediate event-dot upward from the horizontal line of dots. As you start to drag the dot, does the value of the action displayed in the lower left initially increase or decrease. Return to the first display (the one with only three intermediate dots), RESET, and drag one dot upward. Initially does the value of the action increase or decrease? Why the difference in the two displays? Hint: Use the expression for the action.");
+</script>
+
+<br><br>
+<h3>Display #3: Constant acceleration under uniform gravitation.</h3>
+
+<p>Use the program below to show that for the worldline of least action the acceleration of the apple, corresponding to each pair of successive segments, is constant, i.e. the motion of the apple is governed by Newton's second law of motion.</p>
+
+<applet code="JAction.class" codebase="JAction/classes" name="JAction" width="700" height="475">
+<param name="h1" value="0">
+<param name="t1" value="0">
+<param name="h2" value="0">
+<param name="t2" value="3">
+<param name="numOfLayers" value="20">
+<param name="appletMode" value="1">
+<param name="movableEnds" value="1">
+<param name="enableHunting" value="1">
+<param name="enableZoom" value="0">
+</applet>
+
+<!--
+Parameter EXPLANATION:
+appletMode=0 -- no tables at all
+appletMode=1 -- acceleration table
+appletMode=2 -- energy table
+appletMode=3 -- lagrangian and energy table
+appletMode=4 -- table with a, T+V, dS(k), dS(k)+dS(k+1), [dS(k)+dS(k+1)]min
+appletMode=5 -- table with dS(k) and for selected segment pair with dS(k)+dS(k+1), [dS(k)+dS(k+1)]min, a, T+V
+movableEnds=0 -- movable ends turned OFF
+movableEnds=1 -- movable ends turned ON
+enableHunting=0 -- hunting turned OFF
+enableHunting=1 -- hunting turned ON
+enableZoom=0 -- zoom turned OFF
+enableZoom=1 -- zoom turned ON
+-->
+
+<br><br>
+<p>The acceleration for each pair of successive segments of current test worldline is displayed in table situated on the right. Click the HUNT button to start automatic hunting for the minimum-action worldline. When the worldline stops changing, click on PAUSE. What is the value of the constant acceleration?</p>
+
+<script language="JavaScript">
+question("9.","<i>Throwing upward from a cliff. Predict.</i> Now you are about to increase the height of the launch event at the left (with zero height for the final event) and then HUNT. Will the resulting motion have the same uniform acceleration as in the case that both launch and catch are at zero height? Does your answer depend on how high the launch event is dragged? Will your answer be different if the catch event is also raised? RESET, drag the initial event upward, then HUNT. Were your predictions correct? If not, state the correct predictions and explain why they are correct.");
+</script>
+
+<br>
+<script language="JavaScript">
+technicalQuestion("D.","<i>Three in one. Technical.</i> RESET, then HUNT until the display stops changing. Choose one intermediate point on the worldline and drag this point up and down. Why does the change of height of <i>one</i> point lead to change in <i>three</i> entries in the acceleration table?");
+</script>
+
+<br><br>
+<h3>Display #4: Constant mechanical energy for the least-action worldline</h3>
+
+<p>Use the program below to show that for the worldline of least action the mechanical energy of the apple along each segment is a constant of the motion.</p>
+
+<applet code="JAction.class" codebase="JAction/classes" name="JAction" width="700" height="475">
+<param name="h1" value="0">
+<param name="t1" value="0">
+<param name="h2" value="0">
+<param name="t2" value="3">
+<param name="numOfLayers" value="20">
+<param name="appletMode" value="3">
+<param name="movableEnds" value="1">
+<param name="enableHunting" value="1">
+<param name="enableZoom" value="0">
+</applet>
+
+<!--
+Parameter EXPLANATION:
+appletMode=0 -- no tables at all
+appletMode=1 -- acceleration table
+appletMode=2 -- energy table
+appletMode=3 -- lagrangian and energy table
+appletMode=4 -- table with a, T+V, dS(k), dS(k)+dS(k+1), [dS(k)+dS(k+1)]min
+appletMode=5 -- table with dS(k) and for selected segment pair with dS(k)+dS(k+1), [dS(k)+dS(k+1)]min, a, T+V
+movableEnds=0 -- movable ends turned OFF
+movableEnds=1 -- movable ends turned ON
+enableHunting=0 -- hunting turned OFF
+enableHunting=1 -- hunting turned ON
+enableZoom=0 -- zoom turned OFF
+enableZoom=1 -- zoom turned ON
+-->
+
+<p>The total energy <i>E</i>&nbsp;=&nbsp;<i>T</i>&nbsp;+&nbsp;<i>V</i> for each segment of current trial worldline is displayed in the table at the right of the display. Click the HUNT button to find the worldline of  least action. Write down the value of the constant energy.</p>
+
+<script language="JavaScript">
+question("10.","<i>Throwing from cliff to cliff.</i> RESET and drag both the initial event and the final event to the same height greater than zero. <i>Predict:</i> When you HUNT and the display stops changing, will the total energy be greater or less than (or the same as) it was when initial and final events were at zero height? Press the HUNT button. Was your prediction correct? State the correct prediction and explain why it is correct.");
+</script>
+
+<script language="JavaScript">
+question("11.","<i>Catching on a step.</i> RESET and drag only the final event to a height greater than zero. Predict: When you HUNT and the display stops changing, will the total energy be greater or less than (or the same as) it was when initial and final events were at zero height? HUNT and explain why your prediction was correct or incorrect.");
+</script>
+
+<script language="JavaScript">
+question("12.","<i>Predicting the peak I.</i> RESET and HUNT until the display stops changing. From the velocity along the first segment in the preceding display, calculate the expected maximum height using the conservation of energy. How does your calculated maximum value compare with the peak value read off of the worldline directly? Can you think of a qualitative reason for any discrepancy between the two values?");
+</script>
+
+<script language="JavaScript">
+question("13.","<i>Predicting the peak II.</i> Using the velocity-acceleration table in the preceding display, derive an estimate of the initial vertical velocity at <i>t</i>&nbsp;=&nbsp;0. (This is not the same as the average velocity along the first segment displayed in the table.) When you use that initial value of the velocity, how does your calculated maximum height compare with the height shown in the graph?");
+</script>
+
+<br>
+<script language="JavaScript">
+technicalQuestion("E.","<i>Influence of one. Technical.</i> How many entries in the energy column <i>E</i>&nbsp;=&nbsp;<i>T</i>&nbsp;+&nbsp;<i>V</i> are altered by dragging one intermediate point away from the minimum-action condition? Explain why this is the same as or different from the number of entries changed in the acceleration table when you moved one intermediate point (technical question D).");
+</script>
+
+<script language="JavaScript">
+question("14.","<i>Lagrangian a constant?</i> HUNT until the display stops changing and look in the table for values of the Lagrangian <i>L = T&nbsp;–&nbsp;V</i>. Is the value of the Lagrangian <i>L</i> a constant of the motion?");
+</script>
+
+<script language="JavaScript">
+question("15.","<i>Fickle Lagrangian.</i> Explain qualitatively why <i>L</i> has a large positive value for segments near the beginning and end of the worldline and a large negative value for segments near the maximum height.");
+</script>
+
+<script language="JavaScript">
+question("16.","<i>All-negative Lagrangian? Predict.</i> Suppose that you raise the initial and final points to the same height greater than zero. Can you find a value for this initial/final height so that all entries in the <i>L = T&nbsp;–&nbsp;V</i> column of the table are negative? Try this and report on the correctness of your prediction. Does your result demonstrate that the principle of least action is wrong?");
+</script>
+
+<br><br>
+<h3>Display #5: The Incremental Principle of Least Action</h3>
+
+<p>Mechanics is often taught using Newton's second law: <i><b>F = ma</b></i>. What is the relation between <i><b>F = ma</b></i> and the principle of least action that we have been describing here? Richard Feynman answers this question clearly:</p>
+
+<p><i>There is quite a difference in the characteristic of a law which says a certain integral from one place to another is a minimum—which tells something about the whole path—and of a law which says that as you go along, there is a force that makes it accelerate. The second way tells how you inch your way along the path, and the other is a grand statement about the whole path. ... Let's suppose that we have the true path and that it goes through some point a in space and time, and also through another nearby point b. Now if the entire integral from t<sub>1</sub> to t<sub>2</sub> is a minimum, it is also necessary that the integral along the little section from a to b is also a minimum. It can't be that the part from a to b is a little bit more. Otherwise you could just fiddle with just that piece of the path and make the whole integral a little lower. So every subsection of the path must also be a minimum. And this is true no matter how short the subsection.  Therefore the principle that the whole path gives a minimum can be stated also by saying that an infinitesimal section of path also has a curve such that it has a minimum action. ... So the statement about the gross property of the whole path becomes a statement of what happens for a short section of the path—a differential statement. ... That's the qualitative explanation of the relation between the gross law and the differential law.</i></p> 
+
+           <div align="right">—Richard P. Feynman et. al, <i>The Feynman Lectures on Physics</i>, Volume II, page 19-8</div>
+
+<p>In brief, Feynman is saying that if the entire worldline has minimum action
+compared with possible nearby worldlines, then every small segment along
+the worldline must have minimum action compared to possible nearby segments.</p>
+
+<p>This final  display allows you to check out Feynman's description by moving one of the point-events on the worldline and watching the resulting change in the action for segments on either side of that point and also the total action of the entire worldline. </p>
+
+<p>Start by playing with the Zoom feature that allows you to look closely at any moveable point-event on the worldline.</p>
+
+
+<applet code="JAction.class" codebase="JAction/classes" name="JAction" width="700" height="475">
+<param name="h1" value="0">
+<param name="t1" value="0">
+<param name="h2" value="0">
+<param name="t2" value="3">
+<param name="numOfLayers" value="10">
+<param name="appletMode" value="5">
+<param name="movableEnds" value="0">
+<param name="enableHunting" value="1">
+<param name="enableZoom" value="1">
+</applet>
+
+<!--
+Parameter EXPLANATION:
+appletMode=0 -- no tables at all
+appletMode=1 -- acceleration table
+appletMode=2 -- energy table
+appletMode=3 -- lagrangian and energy table
+appletMode=4 -- table with a, T+V, dS(k), dS(k)+dS(k+1), [dS(k)+dS(k+1)]min
+appletMode=5 -- table with dS(k) and for selected segment pair with dS(k)+dS(k+1), [dS(k)+dS(k+1)]min, a, T+V
+movableEnds=0 -- movable ends turned OFF
+movableEnds=1 -- movable ends turned ON
+enableHunting=0 -- hunting turned OFF
+enableHunting=1 -- hunting turned ON
+enableZoom=0 -- zoom turned OFF
+enableZoom=1 -- zoom turned ON
+-->
+
+<br><br>
+<script language="JavaScript">
+question("17.","<i>Minimum action for segments I?</i> HUNT for a worldline of minimum action. Now zoom in on one intermediate point and move it up and down. Pay attention to the values of the action in the table at the right. Does moving the point increase or decrease the value of the summed action on the two adjacent segments? Does it increase or decrease the value of the total action along the worldline?");
+</script>
+
+<script language="JavaScript">
+question("18.","<i>Minimum action for segments II?</i>  RESET and construct a worldline that is <i>not</i> one of minimum action. One way to do this is to HUNT and then press PAUSE quickly, before the display reaches equilibrium. Zoom in on one intermediate point and <i>predict:</i> Can you move this point so that the summed action on the two adjacent segments increase or decrease? Try it. Was your prediction correct? In this case can you move the point so that the value of the total action along the worldline decreases?");
+</script>
+
+<script language="JavaScript">
+question("19.","<i>Minimum action for segments III?</i>  Explain any difference between the results you found in questions 17 and 18. State clearly the answer to the following question: Under what circumstances can moving one intermediate point-event increase the total value of the action along the worldline?");
+</script>
+
+<script language="JavaScript">
+question("20.","<i>Acceleration a minimum?</i> HUNT for a worldline of minimum action, then zoom in, click on one event without moving it, and record the acceleration on the segment pair (value given in the lower right). <i>Predict</i> what will happen when you drag that point up and down: Will the value of the acceleration increase or decrease? Is the acceleration between these two segments either a minimum or a maximum for the minimum-action worldline? Now drag the point up and then down. Was your prediction correct?");
+</script>
+
+<script language="JavaScript">
+question("21.","<i>Total energy a minimum?</i> HUNT for a worldline of minimum action, then zoom in, click on one event without moving it, and record the energies along each of the two segments on either side of that point. <i>Predict</i> what will happen when you drag that point up and down: Will the energies on the adjacent segments increase or decrease? For the minimum-action worldline, is the energy a minimum (or maximum)? Now drag the point up and then down. Was your prediction correct?");
+</script>
+
+<p>This diagram demonstrates that when the worldline minimizes action, every segment also minimizes action. Why is this important? Because, as Feynman says, it connects the principle of least action to Newton's acceleration law <i>F&nbsp;=&nbsp;ma</i>. By analyzing the action on a pair of segments, as in this display, you can derive <i>F&nbsp;=&nbsp;ma</i> using elementary calculus. See details in the paper <i>Classroom derivation of Newtonian mechanics from the principle of least action.</i> by Jozef Hanc, Slavomir Tuleja, and Martina Hancova at the website:</p>
+<p><center><a href="http://www.eftaylor.com/leastaction.html">http://www.eftaylor.com/leastaction.html</a></center></p>
+
+<p>But there is a further payoff: The so-called <i>Lagrange equations</i> are another expression of Newton's laws which are in some ways more general and powerful than <i>F&nbsp;=&nbsp;ma</i> . For an introduction to Lagrange's equations and a paper deriving the Lagrange equations from the principle of least action, see the same website.</p>
+
+
+</body>
+</html>
