@@ -6,8 +6,7 @@ Copied from  https://www.eftaylor.com/software/ActionApplets/LeastAction.html
 
 ## GitHub Page
 
-Viewable at:
-`https://murguia.github.io/LeastAction/`
+Viewable at: https://murguia.github.io/least-action/
 
 ## Important Note
 
