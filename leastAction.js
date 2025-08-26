@@ -58,30 +58,18 @@ class LeastActionSimulation {
     }
     
     initializePoints() {
-        // In Java applet, numOfLayers refers to the number of segments (not points)
+        // In Java applet, numOfLayers is the number of segments
+        // Array size is numOfLayers + 1, which includes endpoints
         // So numOfLayers=4 means 5 points total (3 intermediate + 2 endpoints)
-        const numPoints = this.config.numOfLayers + 1; // Total points
+        
+        const numPoints = this.config.numOfLayers + 1;
         this.points = [];
         
-        // Special case for Display #1: 3 intermediate points at specific times
-        if (this.config.numOfLayers === 4 && this.config.appletMode === 0 && 
-            this.config.movableEnds === 0 && this.config.enableHunting === 0) {
-            // Display #1: Place intermediate points at t = 0.75, 1.5, 2.25
-            // This gives equal spacing in time (every 0.75 seconds)
-            this.points = [
-                { t: 0, h: 0 },      // Start point
-                { t: 0.75, h: 0 },   // First intermediate
-                { t: 1.5, h: 0 },    // Second intermediate
-                { t: 2.25, h: 0 },   // Third intermediate
-                { t: 3, h: 0 }       // End point
-            ];
-        } else {
-            // Default: Create evenly spaced points along the worldline
-            for (let i = 0; i < numPoints; i++) {
-                const t = this.config.t1 + (this.config.t2 - this.config.t1) * i / (numPoints - 1);
-                const h = this.config.h1 + (this.config.h2 - this.config.h1) * i / (numPoints - 1);
-                this.points.push({ t: t, h: h });
-            }
+        // Create evenly spaced points
+        for (let i = 0; i < numPoints; i++) {
+            const t = this.config.t1 + (this.config.t2 - this.config.t1) * i / this.config.numOfLayers;
+            const h = this.config.h1 + (this.config.h2 - this.config.h1) * i / this.config.numOfLayers;
+            this.points.push({ t: t, h: h });
         }
     }
     
