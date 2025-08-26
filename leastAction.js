@@ -58,6 +58,11 @@ class LeastActionSimulation {
     }
     
     initializePoints() {
+        // In Java applet, numOfLayers refers to the number of segments (not points)
+        // So numOfLayers=4 means 5 points total (3 intermediate + 2 endpoints)
+        const numPoints = this.config.numOfLayers + 1; // Total points
+        this.points = [];
+        
         // Special case for Display #1: 3 intermediate points at specific times
         if (this.config.numOfLayers === 4 && this.config.appletMode === 0 && 
             this.config.movableEnds === 0 && this.config.enableHunting === 0) {
@@ -72,9 +77,6 @@ class LeastActionSimulation {
             ];
         } else {
             // Default: Create evenly spaced points along the worldline
-            const numPoints = this.config.numOfLayers + 1; // Total points
-            this.points = [];
-            
             for (let i = 0; i < numPoints; i++) {
                 const t = this.config.t1 + (this.config.t2 - this.config.t1) * i / (numPoints - 1);
                 const h = this.config.h1 + (this.config.h2 - this.config.h1) * i / (numPoints - 1);
@@ -256,13 +258,20 @@ class LeastActionSimulation {
         this.ctx.font = '10px Arial';
         this.ctx.fillStyle = '#666';
         
-        // Time grid
-        for (let t = 0; t <= this.config.t2; t += 0.5) {
-            const x = this.timeToX(t);
+        // Draw vertical grid lines at intermediate point positions
+        this.ctx.strokeStyle = '#ccc';
+        for (let i = 1; i < this.points.length - 1; i++) {
+            const x = this.timeToX(this.points[i].t);
             this.ctx.beginPath();
             this.ctx.moveTo(x, this.margin);
             this.ctx.lineTo(x, this.margin + this.graphHeight);
             this.ctx.stroke();
+        }
+        
+        // Time axis labels
+        this.ctx.strokeStyle = '#ddd';
+        for (let t = 0; t <= this.config.t2; t += 0.5) {
+            const x = this.timeToX(t);
             
             this.ctx.textAlign = 'center';
             this.ctx.fillText(t.toFixed(1), x, this.margin + this.graphHeight + 15);
