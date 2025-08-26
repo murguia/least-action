@@ -58,14 +58,28 @@ class LeastActionSimulation {
     }
     
     initializePoints() {
-        // Create evenly spaced points along the worldline
-        const numPoints = this.config.numOfLayers + 2; // Include start and end
-        this.points = [];
-        
-        for (let i = 0; i < numPoints; i++) {
-            const t = this.config.t1 + (this.config.t2 - this.config.t1) * i / (numPoints - 1);
-            const h = this.config.h1 + (this.config.h2 - this.config.h1) * i / (numPoints - 1);
-            this.points.push({ t: t, h: h });
+        // Special case for Display #1: 3 intermediate points at specific times
+        if (this.config.numOfLayers === 4 && this.config.appletMode === 0 && 
+            this.config.movableEnds === 0 && this.config.enableHunting === 0) {
+            // Display #1: Place intermediate points at t = 0.75, 1.5, 2.25
+            // This gives equal spacing in time (every 0.75 seconds)
+            this.points = [
+                { t: 0, h: 0 },      // Start point
+                { t: 0.75, h: 0 },   // First intermediate
+                { t: 1.5, h: 0 },    // Second intermediate
+                { t: 2.25, h: 0 },   // Third intermediate
+                { t: 3, h: 0 }       // End point
+            ];
+        } else {
+            // Default: Create evenly spaced points along the worldline
+            const numPoints = this.config.numOfLayers + 1; // Total points
+            this.points = [];
+            
+            for (let i = 0; i < numPoints; i++) {
+                const t = this.config.t1 + (this.config.t2 - this.config.t1) * i / (numPoints - 1);
+                const h = this.config.h1 + (this.config.h2 - this.config.h1) * i / (numPoints - 1);
+                this.points.push({ t: t, h: h });
+            }
         }
     }
     
@@ -149,9 +163,9 @@ class LeastActionSimulation {
     calculateTotalAction() {
         // Total action using the exact formula from Java: S = Σ[0.5*m*(Δh²/Δt - g*(h[i]+h[i+1])*Δt)]
         let S = 0;
-        const deltaT = (this.config.t2 - this.config.t1) / this.config.numOfLayers;
         
         for (let i = 0; i < this.points.length - 1; i++) {
+            const deltaT = this.points[i + 1].t - this.points[i].t;
             const dh = this.points[i + 1].h - this.points[i].h;
             S += 0.5 * this.mass * (dh * dh / deltaT - this.g * (this.points[i].h + this.points[i + 1].h) * deltaT);
         }
@@ -162,7 +176,8 @@ class LeastActionSimulation {
         // Acceleration between segments i and i+1
         if (i <= 0 || i >= this.points.length - 1) return 0;
         
-        const dt = this.points[1].t - this.points[0].t; // Constant deltaT
+        // Use the actual time between the velocity measurements
+        const dt = (this.points[i + 1].t - this.points[i - 1].t) / 2;
         const v1 = this.calculateVelocity(i);
         const v2 = this.calculateVelocity(i + 1);
         
@@ -577,11 +592,25 @@ class LeastActionSimulation {
             if (!this.isHunting) return;
             
             // Gauss-Seidel iteration from Euler's Variational Method
-            // h[i] = (h[i+1] + h[i-1] + g*deltaT*deltaT) / 2.0
-            const deltaT = (this.config.t2 - this.config.t1) / this.config.numOfLayers;
+            // For uniform spacing: h[i] = (h[i+1] + h[i-1] + g*deltaT*deltaT) / 2.0
+            // For non-uniform spacing, we need to adjust the formula
             
             for (let i = 1; i < this.points.length - 1; i++) {
-                this.points[i].h = (this.points[i + 1].h + this.points[i - 1].h + this.g * deltaT * deltaT) / 2.0;
+                const dt_prev = this.points[i].t - this.points[i - 1].t;
+                const dt_next = this.points[i + 1].t - this.points[i].t;
+                
+                if (Math.abs(dt_prev - dt_next) < 0.001) {
+                    // Uniform spacing - use standard formula
+                    this.points[i].h = (this.points[i + 1].h + this.points[i - 1].h + this.g * dt_prev * dt_prev) / 2.0;
+                } else {
+                    // Non-uniform spacing - weighted average
+                    const weight_prev = 1 / dt_prev;
+                    const weight_next = 1 / dt_next;
+                    const total_weight = weight_prev + weight_next;
+                    
+                    this.points[i].h = (weight_prev * this.points[i - 1].h + weight_next * this.points[i + 1].h) / total_weight
+                                     + this.g * dt_prev * dt_next / 2;
+                }
                 
                 // Keep height non-negative
                 if (this.points[i].h < 0) this.points[i].h = 0;
