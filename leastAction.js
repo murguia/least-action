@@ -280,8 +280,9 @@ class LeastActionSimulation {
     }
     
     drawWorldline() {
-        this.ctx.strokeStyle = '#00f';
-        this.ctx.lineWidth = 2;
+        this.ctx.strokeStyle = '#2a9d8f';
+        this.ctx.lineWidth = 2.5;
+        this.ctx.lineJoin = 'round';
         this.ctx.beginPath();
         
         for (let i = 0; i < this.points.length; i++) {
@@ -307,18 +308,17 @@ class LeastActionSimulation {
             const isDraggable = (i > 0 && i < this.points.length - 1) || 
                                (this.config.movableEnds && (i === 0 || i === this.points.length - 1));
             
-            // Draw point
-            this.ctx.fillStyle = isDraggable ? '#000' : '#f00';
+            // Draw point — dark for draggable intermediates, apple-red for fixed endpoints.
+            this.ctx.fillStyle = isDraggable ? '#1f1d1a' : '#e63946';
             this.ctx.beginPath();
-            this.ctx.arc(x, y, 5, 0, 2 * Math.PI);
+            this.ctx.arc(x, y, 6, 0, 2 * Math.PI);
             this.ctx.fill();
-            
-            // Highlight if being dragged
+
             if (i === this.dragIndex) {
-                this.ctx.strokeStyle = '#ff0';
-                this.ctx.lineWidth = 2;
+                this.ctx.strokeStyle = '#f4a261';
+                this.ctx.lineWidth = 2.5;
                 this.ctx.beginPath();
-                this.ctx.arc(x, y, 7, 0, 2 * Math.PI);
+                this.ctx.arc(x, y, 9, 0, 2 * Math.PI);
                 this.ctx.stroke();
             }
         }
@@ -476,10 +476,18 @@ class LeastActionSimulation {
     }
     
     // Mouse event handlers
-    onMouseDown(e) {
+    getCanvasCoords(clientX, clientY) {
         const rect = this.canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const scaleX = this.canvas.width / rect.width;
+        const scaleY = this.canvas.height / rect.height;
+        return {
+            x: (clientX - rect.left) * scaleX,
+            y: (clientY - rect.top) * scaleY
+        };
+    }
+
+    onMouseDown(e) {
+        const { x, y } = this.getCanvasCoords(e.clientX, e.clientY);
         
         // Check if clicking on a draggable point
         for (let i = 0; i < this.points.length; i++) {
@@ -502,9 +510,9 @@ class LeastActionSimulation {
     }
     
     onMouseMove(e) {
-        const rect = this.canvas.getBoundingClientRect();
-        this.mouseX = e.clientX - rect.left;
-        this.mouseY = e.clientY - rect.top;
+        const { x, y } = this.getCanvasCoords(e.clientX, e.clientY);
+        this.mouseX = x;
+        this.mouseY = y;
         
         if (this.isDragging && this.dragIndex >= 0) {
             // Update point height (keep time fixed for intermediate points)
@@ -663,7 +671,6 @@ class LeastActionSimulation {
 function createControls(simulationId, simulation) {
     const controlsDiv = document.createElement('div');
     controlsDiv.id = `${simulationId}-controls`;
-    controlsDiv.style.marginTop = '10px';
     
     // Hunt button
     const huntBtn = document.createElement('button');
@@ -724,9 +731,6 @@ window.addEventListener('DOMContentLoaded', () => {
         canvas.id = `simulation-${index}`;
         canvas.width = parseInt(applet.getAttribute('width')) || 700;
         canvas.height = parseInt(applet.getAttribute('height')) || 475;
-        canvas.style.border = '1px solid #ccc';
-        canvas.style.display = 'block';
-        
         // Create container div
         const container = document.createElement('div');
         container.className = 'simulation-container';
