@@ -37,6 +37,7 @@ class LeastActionSimulation {
         // Interaction state
         this.isDragging = false;
         this.dragIndex = -1;
+        this.focusIndex = -1;  // last-clicked draggable point; sets zoom focus
         this.isHunting = false;
         this.huntingTimer = null;
         this.zoomLevel = 1;
@@ -86,32 +87,65 @@ class LeastActionSimulation {
         this.canvas.addEventListener('touchend', (e) => this.onTouchEnd(e));
     }
     
+    // View bounds — cached per draw so all transforms agree on the visible window.
+    // Unzoomed: full physics range with auto-rescale to fit dragged points.
+    // Zoomed: sub-window of size (range / zoomLevel) centered on zoomCenter, clamped to stay within full range.
+    computeViewBounds() {
+        const maxH = Math.max(30, ...this.points.map(p => p.h), this.config.h1, this.config.h2);
+        const minH = Math.min(0, ...this.points.map(p => p.h), this.config.h1, this.config.h2);
+        const fullT1 = this.config.t1;
+        const fullT2 = this.config.t2;
+
+        if (this.zoomLevel > 1 && this.zoomCenter) {
+            const tHalf = (fullT2 - fullT1) / (2 * this.zoomLevel);
+            const hHalf = (maxH - minH) / (2 * this.zoomLevel);
+            const cT = Math.max(fullT1 + tHalf, Math.min(fullT2 - tHalf, this.zoomCenter.t));
+            const cH = Math.max(minH + hHalf, Math.min(maxH - hHalf, this.zoomCenter.h));
+            this.viewT1 = cT - tHalf;
+            this.viewT2 = cT + tHalf;
+            this.viewH1 = cH - hHalf;
+            this.viewH2 = cH + hHalf;
+        } else {
+            this.viewT1 = fullT1;
+            this.viewT2 = fullT2;
+            this.viewH1 = minH;
+            this.viewH2 = maxH;
+        }
+    }
+
     // Coordinate transformation functions
     timeToX(t) {
-        const tRange = this.config.t2 - this.config.t1;
-        return this.margin + (t - this.config.t1) / tRange * this.graphWidth;
+        if (this.viewT1 === undefined) this.computeViewBounds();
+        return this.margin + (t - this.viewT1) / (this.viewT2 - this.viewT1) * this.graphWidth;
     }
-    
+
     heightToY(h) {
-        // Find max height for scaling
-        const maxH = Math.max(30, ...this.points.map(p => p.h), this.config.h1, this.config.h2);
-        const minH = Math.min(0, ...this.points.map(p => p.h), this.config.h1, this.config.h2);
-        const hRange = maxH - minH;
-        
-        return this.margin + this.graphHeight - ((h - minH) / hRange * this.graphHeight);
+        if (this.viewH1 === undefined) this.computeViewBounds();
+        return this.margin + this.graphHeight - ((h - this.viewH1) / (this.viewH2 - this.viewH1) * this.graphHeight);
     }
-    
+
     xToTime(x) {
-        const tRange = this.config.t2 - this.config.t1;
-        return this.config.t1 + (x - this.margin) / this.graphWidth * tRange;
+        if (this.viewT1 === undefined) this.computeViewBounds();
+        return this.viewT1 + (x - this.margin) / this.graphWidth * (this.viewT2 - this.viewT1);
     }
-    
+
     yToHeight(y) {
-        const maxH = Math.max(30, ...this.points.map(p => p.h), this.config.h1, this.config.h2);
-        const minH = Math.min(0, ...this.points.map(p => p.h), this.config.h1, this.config.h2);
-        const hRange = maxH - minH;
-        
-        return minH + (this.margin + this.graphHeight - y) / this.graphHeight * hRange;
+        if (this.viewH1 === undefined) this.computeViewBounds();
+        return this.viewH1 + (this.margin + this.graphHeight - y) / this.graphHeight * (this.viewH2 - this.viewH1);
+    }
+
+    // "Nice" tick step for an axis: produces ~targetCount labeled gridlines using a 1/2/5 sequence.
+    niceStep(range, targetCount) {
+        if (range <= 0) return 1;
+        const raw = range / targetCount;
+        const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+        const norm = raw / mag;
+        let step;
+        if (norm < 1.5) step = 1;
+        else if (norm < 3) step = 2;
+        else if (norm < 7) step = 5;
+        else step = 10;
+        return step * mag;
     }
     
     // Physics calculations - matching Java implementation exactly
@@ -184,9 +218,12 @@ class LeastActionSimulation {
     
     // Drawing functions
     draw() {
+        // Refresh cached view bounds before any transform is used.
+        this.computeViewBounds();
+
         // Clear canvas
         this.ctx.clearRect(0, 0, this.width, this.height);
-        
+
         // Draw axes
         this.drawAxes();
         
@@ -241,73 +278,90 @@ class LeastActionSimulation {
     }
     
     drawGrid() {
-        this.ctx.strokeStyle = '#ddd';
         this.ctx.lineWidth = 0.5;
         this.ctx.font = '10px Arial';
         this.ctx.fillStyle = '#666';
-        
-        // Draw vertical grid lines at intermediate point positions
+
+        // Vertical guides at intermediate point t-positions (only if visible in current view).
         this.ctx.strokeStyle = '#ccc';
         for (let i = 1; i < this.points.length - 1; i++) {
-            const x = this.timeToX(this.points[i].t);
+            const t = this.points[i].t;
+            if (t < this.viewT1 || t > this.viewT2) continue;
+            const x = this.timeToX(t);
             this.ctx.beginPath();
             this.ctx.moveTo(x, this.margin);
             this.ctx.lineTo(x, this.margin + this.graphHeight);
             this.ctx.stroke();
         }
-        
-        // Time axis labels
+
+        // Time axis labels — adaptive step so labels remain visible at any zoom.
         this.ctx.strokeStyle = '#ddd';
-        for (let t = 0; t <= this.config.t2; t += 0.5) {
+        const tStep = this.niceStep(this.viewT2 - this.viewT1, 6);
+        const tDecimals = tStep < 0.1 ? 3 : (tStep < 1 ? 2 : 1);
+        const tStart = Math.ceil(this.viewT1 / tStep - 1e-9) * tStep;
+        for (let t = tStart; t <= this.viewT2 + 1e-9; t += tStep) {
             const x = this.timeToX(t);
-            
             this.ctx.textAlign = 'center';
-            this.ctx.fillText(t.toFixed(1), x, this.margin + this.graphHeight + 15);
+            this.ctx.fillText(t.toFixed(tDecimals), x, this.margin + this.graphHeight + 15);
         }
-        
-        // Height grid
-        const maxH = Math.max(30, ...this.points.map(p => p.h));
-        for (let h = 0; h <= maxH; h += 5) {
+
+        // Height grid + labels — adaptive step.
+        const hStep = this.niceStep(this.viewH2 - this.viewH1, 6);
+        const hDecimals = hStep < 0.1 ? 2 : (hStep < 1 ? 1 : 0);
+        const hStart = Math.ceil(this.viewH1 / hStep - 1e-9) * hStep;
+        for (let h = hStart; h <= this.viewH2 + 1e-9; h += hStep) {
             const y = this.heightToY(h);
             this.ctx.beginPath();
             this.ctx.moveTo(this.margin, y);
             this.ctx.lineTo(this.margin + this.graphWidth, y);
             this.ctx.stroke();
-            
+
             this.ctx.textAlign = 'right';
-            this.ctx.fillText(h.toFixed(0), this.margin - 5, y + 3);
+            this.ctx.fillText(h.toFixed(hDecimals), this.margin - 5, y + 3);
         }
     }
     
     drawWorldline() {
+        // Clip so the worldline never escapes the graph area when zoomed.
+        this.ctx.save();
+        this.ctx.beginPath();
+        this.ctx.rect(this.margin, this.margin, this.graphWidth, this.graphHeight);
+        this.ctx.clip();
+
         this.ctx.strokeStyle = '#2a9d8f';
         this.ctx.lineWidth = 2.5;
         this.ctx.lineJoin = 'round';
         this.ctx.beginPath();
-        
+
         for (let i = 0; i < this.points.length; i++) {
             const x = this.timeToX(this.points[i].t);
             const y = this.heightToY(this.points[i].h);
-            
+
             if (i === 0) {
                 this.ctx.moveTo(x, y);
             } else {
                 this.ctx.lineTo(x, y);
             }
         }
-        
+
         this.ctx.stroke();
+        this.ctx.restore();
     }
-    
+
     drawPoints() {
+        this.ctx.save();
+        this.ctx.beginPath();
+        this.ctx.rect(this.margin, this.margin, this.graphWidth, this.graphHeight);
+        this.ctx.clip();
+
         for (let i = 0; i < this.points.length; i++) {
             const x = this.timeToX(this.points[i].t);
             const y = this.heightToY(this.points[i].h);
-            
+
             // Determine if point is draggable
-            const isDraggable = (i > 0 && i < this.points.length - 1) || 
+            const isDraggable = (i > 0 && i < this.points.length - 1) ||
                                (this.config.movableEnds && (i === 0 || i === this.points.length - 1));
-            
+
             // Draw point — dark for draggable intermediates, apple-red for fixed endpoints.
             this.ctx.fillStyle = isDraggable ? '#1f1d1a' : '#e63946';
             this.ctx.beginPath();
@@ -320,8 +374,15 @@ class LeastActionSimulation {
                 this.ctx.beginPath();
                 this.ctx.arc(x, y, 9, 0, 2 * Math.PI);
                 this.ctx.stroke();
+            } else if (i === this.focusIndex) {
+                this.ctx.strokeStyle = '#f9c74f';
+                this.ctx.lineWidth = 2;
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, 10, 0, 2 * Math.PI);
+                this.ctx.stroke();
             }
         }
+        this.ctx.restore();
     }
     
     drawActionDisplay() {
@@ -503,6 +564,12 @@ class LeastActionSimulation {
                 if (isDraggable) {
                     this.isDragging = true;
                     this.dragIndex = i;
+                    this.focusIndex = i;
+                    // If currently zoomed, re-center the view on the newly focused point
+                    // so subsequent zoom-ins (and the current zoom) follow the user's pick.
+                    if (this.zoomLevel > 1) {
+                        this.zoomCenter = { t: this.points[i].t, h: this.points[i].h };
+                    }
                     break;
                 }
             }
@@ -644,22 +711,48 @@ class LeastActionSimulation {
         this.stopHunting();
         this.initializePoints();
         this.minAction = Infinity;
+        this.zoomLevel = 1;
+        this.zoomCenter = null;
+        this.focusIndex = -1;
         this.draw();
     }
     
-    // Zoom functionality
-    zoomIn(centerX, centerY) {
+    // Zoom functionality.
+    // First zoom-in picks a center, in priority order:
+    //   1. The currently focused point (last clicked draggable) — the intended UX.
+    //   2. The cursor position if it happens to be over the graph.
+    //   3. The apex (highest h) of the worldline as a friendly fallback.
+    // Subsequent zoom-ins keep the same center and just tighten the window.
+    zoomIn() {
         if (!this.config.enableZoom) return;
-        
-        this.zoomLevel *= 1.5;
-        this.zoomCenter = { x: centerX, y: centerY };
+
+        if (!this.zoomCenter) {
+            if (this.focusIndex >= 0 && this.focusIndex < this.points.length) {
+                const p = this.points[this.focusIndex];
+                this.zoomCenter = { t: p.t, h: p.h };
+            } else {
+                const overGraph = this.mouseX >= this.margin && this.mouseX <= this.margin + this.graphWidth &&
+                                  this.mouseY >= this.margin && this.mouseY <= this.margin + this.graphHeight;
+                if (overGraph) {
+                    this.zoomCenter = { t: this.xToTime(this.mouseX), h: this.yToHeight(this.mouseY) };
+                } else {
+                    let apex = this.points[0];
+                    for (const p of this.points) {
+                        if (p.h > apex.h) apex = p;
+                    }
+                    this.zoomCenter = { t: apex.t, h: apex.h };
+                }
+            }
+        }
+
+        this.zoomLevel = Math.min(16, this.zoomLevel * 2);
         this.draw();
     }
-    
+
     zoomOut() {
         if (!this.config.enableZoom) return;
-        
-        this.zoomLevel = Math.max(1, this.zoomLevel / 1.5);
+
+        this.zoomLevel = Math.max(1, this.zoomLevel / 2);
         if (this.zoomLevel === 1) {
             this.zoomCenter = null;
         }
@@ -697,8 +790,8 @@ function createControls(simulationId, simulation) {
     if (simulation.config.enableZoom) {
         const zoomInBtn = document.createElement('button');
         zoomInBtn.textContent = 'ZOOM IN';
-        zoomInBtn.onclick = () => simulation.zoomIn(simulation.width / 2, simulation.height / 2);
-        
+        zoomInBtn.onclick = () => simulation.zoomIn();
+
         const zoomOutBtn = document.createElement('button');
         zoomOutBtn.textContent = 'ZOOM OUT';
         zoomOutBtn.onclick = () => simulation.zoomOut();
