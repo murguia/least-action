@@ -33,4 +33,4 @@ The original `index.html` keeps the Java `<applet>` tags intact as configuration
 
 ## Porting status
 
-Per the README, the JS port is a work-in-progress. The original Java applet source is checked out locally at `/Users/rpm/Projects/LeastAction` (Java classes under `ActionApplets/JAction/`) — consult it for intended physics/UX when porting behavior. The live version on eftaylor.com is the other reference. Preserve the `<applet>`-tag-as-config pattern — it's what keeps `index.html` diff-minimal against the original.
+Per the README, the JS port is a work-in-progress. When porting behavior, consult the original Java applet source (Java classes under `ActionApplets/JAction/`, downloadable from eftaylor.com) for intended physics/UX — if a local checkout exists, prefer it. The live version on eftaylor.com is the other reference. Preserve the `<applet>`-tag-as-config pattern — it's what keeps `index.html` diff-minimal against the original.

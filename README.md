@@ -9,3 +9,7 @@ Original source: https://www.eftaylor.com/software/ActionApplets/LeastAction.htm
 ## GitHub Page
 
 Viewable at: https://murguia.github.io/least-action/
+
+## License
+
+The JavaScript port is MIT-licensed — see [LICENSE](LICENSE). The original applet, page text, and pedagogical content remain © 2003 Slavomir Tuleja & Edwin F. Taylor.
